@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Fun Love Game ❤️</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;overflow:hidden}
+
+#bgVideo{
+  position:fixed;inset:0;
+  min-width:100%;min-height:100%;
+  object-fit:cover;
+  z-index:-2;
+  transition: filter 0.5s ease;
+}
+
+/* BLUR EFFECT */
+.blur{
+  filter: blur(8px) brightness(0.7);
+}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:-1}
+
+.container{
+  width:90%;
+  max-width:420px;
+  margin:auto;
+  text-align:center;
+
+  /* Glassmorphism effect */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  padding:22px;
+  border-radius:22px;
+
+  /* Soft border + glow */
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.25),
+    0 0 20px rgba(255,77,109,0.25);
+
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+
+  transition: all 0.4s ease;
+}
+
+/* subtle hover/active feel */
+.container:hover{
+  transform: translate(-50%,-52%) scale(1.02);
+  box-shadow:
+    0 15px 40px rgba(0,0,0,0.35),
+    0 0 25px rgba(255,77,109,0.35);
+}
+
+h1{color:#ff4d6d;font-size:clamp(20px,5vw,26px)}
+p{font-size:clamp(14px,3.5vw,16px)}
+
+button,input{
+  margin:8px;padding:10px 16px;
+  border:none;border-radius:20px;
+  font-size:clamp(14px,3.5vw,16px);
+}
+button{background:#ff4d6d;color:#fff;cursor:pointer}
+.hidden{display:none}
+
+#noBtn{position:absolute}
+
+.heart{
+  position:absolute;
+  width:clamp(50px,12vw,70px);
+  height:clamp(50px,12vw,70px);
+  background:red;
+  transform:rotate(-45deg);
+  animation:float 5s linear infinite;
+}
+.heart::before,.heart::after{
+  content:'';position:absolute;
+  width:100%;height:100%;
+  background:red;border-radius:50%;
+}
+.heart::before{top:-50%}
+.heart::after{left:50%}
+.heart img{
+  position:absolute;
+  width:70%;height:70%;
+  border-radius:50%;
+  top:15%;left:15%;
+  transform:rotate(45deg);
+  object-fit:cover;
+}
+
+@keyframes float{
+  0%{transform:translateY(100vh) rotate(-45deg);opacity:0}
+  50%{opacity:1}
+  100%{transform:translateY(-120px) rotate(-45deg);opacity:0}
+}
+
+.compliment{
+  position:absolute;
+  max-width:70%;
+  background:rgba(255,255,255,0.9);
+  padding:6px 12px;
+  border-radius:15px;
+  font-size:clamp(12px,3vw,14px);
+  color:#ff4d6d;
+  animation:fadeUp 3s ease forwards;
+}
+@keyframes fadeUp{
+  0%{opacity:0;transform:translateY(20px)}
+  30%{opacity:1}
+  100%{opacity:0;transform:translateY(-40px)}
+}
+
+.confetti{position:absolute;width:8px;height:8px;background:yellow;animation:fall 3s linear infinite}
+@keyframes fall{0%{transform:translateY(-50px)}100%{transform:translateY(100vh)}}
+
+@media(max-width:480px){
+  .container{padding:15px}
+  button,input{width:90%}
+}
+</style>
+</head>
+<body>
+
+<video autoplay muted loop id="bgVideo">
+  <source src="0318.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<audio id="bgMusic" loop>
+  <source src="YOUR_MUSIC.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container" id="l1">
+  <h1>Oyeee Akku 😏❤️</h1>
+  <p> Ready For some jhinka chika?</p>
+  <button onclick="next('l1','l2')">Let’s Go 🎮</button>
+</div>
+
+<div class="container hidden" id="l2">
+  <h1>Abhhi Shadi karogi?🎀🤭 😜</h1>
+  <p>NO daba hi do aap 😏</p>
+  <button onclick="next('l2','l3')">Yes 😍</button>
+  <button id="noBtn" onmouseover="moveNo()">No 😞</button>
+</div>
+
+<div class="container hidden" id="l3">
+  <h1>Mini Game 💓</h1>
+  <p>DIL CHURAO ❤️</p>
+  <p id="score">Score: 0</p>
+</div>
+
+<div class="container hidden" id="l4">
+  <h1>Secret Level 🔐</h1>
+  <p>Unlock my heart 💌</p>
+  <input type="password" id="pass" placeholder="Password">
+  <p style="font-size:12px;">Hint:Humare beech kya hai 😝 💭</p>
+  <button onclick="checkPass()">Unlock ❤️</button>
+</div>
+
+<div class="container hidden" id="final">
+  <h1>AAPKA MERA SAATH JANO KA HAI ABB💗 😤</h1>
+  <p>Aapke jaisa koi mila nahi.
+    kaise milta tha hi nahi.🤭💗💌
+  </p>
+</div>
+
+<script>
+const video=document.getElementById('bgVideo');
+const music=document.getElementById('bgMusic');
+const correct="ladayibazi";
+let score=0;
+
+const compliments=[
+"Cutee potaoooo 😍","Jaan ho 😳","Ekdum my homeeee 💖","ufff aapki aadaiyien😆 😏","You're literally perfect 🥺","Stop being itni pyarii 😤❤️","humesha dil mei safar tu karti 😩","You're my happy place 💕"
+];
+
+function next(c,n){
+ document.getElementById(c).classList.add('hidden');
+ document.getElementById(n).classList.remove('hidden');
+
+ video.classList.add('blur');
+
+ video.muted=false;
+ video.play();
+ music.play();
+
+ if(n==='l3'){spawnHearts();startCompliments();}
+}
+
+function moveNo(){
+ const b=document.getElementById('noBtn');
+ b.style.left=Math.random()*(window.innerWidth-100)+'px';
+ b.style.top=Math.random()*(window.innerHeight-50)+'px';
+}
+
+function spawnHearts(){
+ const interval=setInterval(()=>{
+   const h=document.createElement('div');
+   h.className='heart';
+   h.style.left=Math.random()*window.innerWidth+'px';
+
+   const img=document.createElement('img');
+   img.src='chaumau.jpg';
+   h.appendChild(img);
+
+   h.onclick=()=>{
+     score++;
+     document.getElementById('score').innerText='Score: '+score;
+     h.remove();
+     if(score>=5){clearInterval(interval);next('l3','l4');}
+   };
+
+   document.body.appendChild(h);
+   setTimeout(()=>h.remove(),5000);
+ },500);
+}
+
+function startCompliments(){
+ setInterval(()=>{
+   const c=document.createElement('div');
+   c.className='compliment';
+   c.innerText=compliments[Math.floor(Math.random()*compliments.length)];
+   c.style.left=Math.random()*(window.innerWidth-150)+'px';
+   c.style.top=Math.random()*(window.innerHeight-100)+'px';
+   document.body.appendChild(c);
+   setTimeout(()=>c.remove(),3000);
+ },1200);
+}
+
+function checkPass(){
+ if(document.getElementById('pass').value===correct){next('l4','final');celebration();}
+ else alert('Wrong 😝');
+}
+
+function celebration(){
+ setInterval(()=>{
+   const c=document.createElement('div');
+   c.className='confetti';
+   c.style.left=Math.random()*window.innerWidth+'px';
+   document.body.appendChild(c);
+   setTimeout(()=>c.remove(),3000);
+ },100);
+}
+</script>
+
+</body>
+</html>
